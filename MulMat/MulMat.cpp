@@ -20,7 +20,18 @@ extern  float TempsExecution;
 int main()
 {
 	Mat img = cv::imread("../picture/lena.jpg", 0);
+	int pixTotalIteration = 0;
 	imshow("lena", img);
+	
+	for (int y = 0; y < img.rows; y++) {
+		for (int x = 0; x < img.cols; x++) {
+			std::cout << (int)img.at<uchar>(y, x) << std::endl;
+			pixTotalIteration += 1;
+		}
+	}
+
+	std::cout << std::endl << "Iterate through: " << pixTotalIteration << " pixels";
+	std::cout << std::endl << " Rows: " << img.rows << " Cols: " << img.cols << " Should iterate through: " << img.cols * img.rows << std::endl;
 	waitKey(0);
     return 0;
 }
