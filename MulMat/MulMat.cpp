@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include <string>
 #include <iostream>
+#include "cuda.h"
 #include "cuda_runtime.h" 
 #include "device_launch_parameters.h"
 #include <opencv2/core/core.hpp> 
@@ -21,10 +22,11 @@ int main()
 {
 	Mat img = cv::imread("../picture/lena.jpg", 0);
 	int pixTotalIteration = 0;
-	imshow("lena", img);
+	imshow("lenaIn", img);
 	
 	for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
+			img.at<uchar>(y, x) += 50;
 			std::cout << (int)img.at<uchar>(y, x) << std::endl;
 			pixTotalIteration += 1;
 		}
@@ -32,6 +34,8 @@ int main()
 
 	std::cout << std::endl << "Iterate through: " << pixTotalIteration << " pixels";
 	std::cout << std::endl << " Rows: " << img.rows << " Cols: " << img.cols << " Should iterate through: " << img.cols * img.rows << std::endl;
+
+	imshow("lenaOut", img);
 	waitKey(0);
     return 0;
 }

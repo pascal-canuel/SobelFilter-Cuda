@@ -9,13 +9,14 @@
 
 extern "C" cudaError_t ConvolutionCuda(int *ImageIn,  int *ImageOut, int *Kernel, size_t ImageSize) 
 { 
+	int *MatIn, *MatOut;
    // Choose which GPU to run on, change this on a multi-GPU system.    
    cudaError_t cudaStatus = cudaSetDevice(0);    
    if (cudaStatus != cudaSuccess) {   
 		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");  
 		goto Error;  
    } 
-
+   
    Error:
 	return cudaStatus;
 }
