@@ -21,7 +21,7 @@ extern  float TempsExecution;
 
 int main()
 {
-	Mat img = cv::imread("../picture/lena.jpg", 0);
+	Mat img = cv::imread("../picture/lena.jpg", 0); //	need to be external?
 	int pixTotalIteration = 0;
 	imshow("lenaIn", img);
 	
@@ -38,10 +38,13 @@ int main()
 
 	imshow("lenaOut", img);*/
 
-	extern Mat MatOut;
+	Mat MatOut;	//	need to be external?
 	dim3 imageSize = dim3(img.cols, img.rows);
 	int k = 10;
-	
+
+	long sInt = sizeof(int);
+	long sUChar = sizeof(uchar);
+
 	cudaError_t cudaStatus = Launcher_ScalaireMulMat_Int((int*)&img.data, k, (int*)&MatOut.data, imageSize);
 
 	waitKey(0);

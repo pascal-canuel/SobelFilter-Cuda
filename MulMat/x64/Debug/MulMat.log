@@ -6,5 +6,4 @@ C:/Users/usager/source/repos/CudaLab1/MulMat/Kernel.cu(54): warning : variable "
   Kernel.cu
 C:/Users/usager/source/repos/CudaLab1/MulMat/Kernel.cu(54): warning C4101: 'TempsExecution' : variable locale non référencée
   MulMat.cpp
-MulMat.obj : error LNK2001: symbole externe non rÚsolu "class cv::Mat MatOut" (?MatOut@@3VMat@cv@@A)
-C:\Users\usager\source\repos\CudaLab1\x64\Debug\MulMat.exe : fatal error LNK1120: 1 externes non rÚsolus
+  MulMat.vcxproj -> C:\Users\usager\source\repos\CudaLab1\x64\Debug\MulMat.exe
