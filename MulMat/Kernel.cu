@@ -2,6 +2,8 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 
+typedef unsigned char uchar
+
 //	If you want to have the .cu intellisense:
 //	Adding '.cu' under c++ extension in visual studio settings would enable syntax highlighting for c++ 
 //	keywords only. EDIT: It in Tools -> Options -> Text Editor -> File Extension type in cu and select 
@@ -34,7 +36,7 @@ static void Kernel_ScalaireMulMat_Int(int *MatA, int K, int *MatR, dim3 DimMat)
 	int ImageWidth = blockDim.x * gridDim.x;
 	int Index = ImgNumLigne * ImageWidth + ImgNumColonne;
 
-	MatR[Index] = MatA[Index] * K;
+	MatR[Index] = MatA[Index] + K;
 	return;
 }
 

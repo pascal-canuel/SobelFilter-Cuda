@@ -27,7 +27,7 @@ int main()
 	
 	/*for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
-			img.at<uchar>(y, x) += 50;
+			img.at<uchar>(y, x) += 50; 
 			std::cout << (int)img.at<uchar>(y, x) << std::endl;
 			pixTotalIteration += 1;
 		}
