@@ -15,6 +15,7 @@
 using namespace cv;
 
 extern "C" cudaError_t ConvolutionCuda(int *ImageIn, int *ImageOut, int *Kernel, size_t ImageSize);
+extern "C" cudaError_t Launcher_ScalaireMulMat_Int(int *pMatA, int K, int *pMatR, dim3 DimMat);
 
 extern  float TempsExecution;
 
@@ -24,7 +25,7 @@ int main()
 	int pixTotalIteration = 0;
 	imshow("lenaIn", img);
 	
-	for (int y = 0; y < img.rows; y++) {
+	/*for (int y = 0; y < img.rows; y++) {
 		for (int x = 0; x < img.cols; x++) {
 			img.at<uchar>(y, x) += 50;
 			std::cout << (int)img.at<uchar>(y, x) << std::endl;
@@ -35,7 +36,14 @@ int main()
 	std::cout << std::endl << "Iterate through: " << pixTotalIteration << " pixels";
 	std::cout << std::endl << " Rows: " << img.rows << " Cols: " << img.cols << " Should iterate through: " << img.cols * img.rows << std::endl;
 
-	imshow("lenaOut", img);
+	imshow("lenaOut", img);*/
+
+	extern Mat MatOut;
+	dim3 imageSize = dim3(img.cols, img.rows);
+	int k = 10;
+	
+	cudaError_t cudaStatus = Launcher_ScalaireMulMat_Int((int*)&img.data, k, (int*)&MatOut.data, imageSize);
+
 	waitKey(0);
     return 0;
 }
