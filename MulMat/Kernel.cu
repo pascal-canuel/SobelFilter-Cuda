@@ -2,78 +2,73 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 
-typedef unsigned char uchar
+typedef unsigned char uchar;
 
 //	If you want to have the .cu intellisense:
 //	Adding '.cu' under c++ extension in visual studio settings would enable syntax highlighting for c++ 
 //	keywords only. EDIT: It in Tools -> Options -> Text Editor -> File Extension type in cu and select 
 //	Microsoft Visual C++ as the editor and click add
 
-extern "C" cudaError_t ConvolutionCuda(int *ImageIn,  int *ImageOut, int *Kernel, size_t ImageSize) 
-{ 
-   // Choose which GPU to run on, change this on a multi-GPU system.    
-   cudaError_t cudaStatus = cudaSetDevice(0);    
-
-
-   if (cudaStatus != cudaSuccess) {   
-		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");  
-		goto Error;  
-   } 
-   
-   Error:
-	return cudaStatus;
-}
-
 /************************************************************************
 // KERNEL qui permet de faire une multiplication scalaire d'une matrice
 // d'entier. Chaque thread s'occupe d'un résultat
 /***********************************************************************/
-__global__ 
-static void Kernel_ScalaireMulMat_Int(int *MatA, int K, int *MatR, dim3 DimMat)
+__global__
+static void Kernel_ScalaireMulMat_Int(uchar *MatI, int K, uchar *MatO)
 {
 	int ImgNumColonne = blockIdx.x  * blockDim.x + threadIdx.x;
 	int ImgNumLigne = blockIdx.y  * blockDim.y + threadIdx.y;
 	int ImageWidth = blockDim.x * gridDim.x;
 	int Index = ImgNumLigne * ImageWidth + ImgNumColonne;
 
-	MatR[Index] = MatA[Index] + K;
-	return;
+	MatO[Index] = MatI[Index] + 50;
 }
 
 /************************************************************************
 // Fonction de lancement du kernel qui permet de faire une multiplication
 // scalaire d'une matrice d'entier.
 /***********************************************************************/
-extern "C" cudaError_t Launcher_ScalaireMulMat_Int(int *pMatA, int K, int *pMatR, dim3 DimMat)
+extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *pMatO, dim3 DimMat)
 {
-	int BLOCK_SIZE = 32; //	Should be defined
-	int *MatA, *MatR;
-	dim3 dimBlock(DimMat.x, DimMat.y);
-	//dim3 dimGrid(iDivUp(DimMat.x, BLOCK_SIZE), iDivUp(DimMat.y, BLOCK_SIZE)); 	
-	dim3 dimGrid(BLOCK_SIZE, BLOCK_SIZE);
-	cudaError_t cudaStatus; 
-	// Partir un timer pour calculer le temps d'exécution 
-	unsigned int timer = 0; float TempsExecution;  
-	// Allouer l'espace memoire des 2 matrices sur la carte GPU 
-	size_t memSize = DimMat.x * DimMat.y * sizeof(int); 
-	cudaMalloc( (void **) &MatA, memSize ); 
-	cudaMalloc( (void **) &MatR, memSize ); 
-	// Copier de la matrice A dans la memoire du GPU 
-	cudaMemcpy( MatA, pMatA, memSize, cudaMemcpyHostToDevice ); 
-	// Partir le kernel. ************* Sur une seul ligne  ********* 
-	Kernel_ScalaireMulMat_Int<<<dimGrid,dimBlock>>>((int*)MatA,(int)K,(int*)MatR, DimMat);
-	//CUT_CHECK_ERROR("Kernel execution failed\n"); 
-	// Attendre la fin du kernel  
-	cudaStatus = cudaDeviceSynchronize();  
-	if (cudaStatus != cudaSuccess) {   
-		fprintf(stderr, "Kernel  BackGroundSoustractionHSV failed!");
-		return cudaStatus;  
+	//	1. Initialize data
+	//	Choose which GPU to run on, change this on a multi-GPU system.    
+	cudaError_t cudaStatus = cudaSetDevice(0);
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
+		return cudaStatus;
 	}
-	// Transfert de la matrice résultat 
-	//CUDA_SAFE_CALL( cudaMemcpy(pMatR, MatR, memSize, cudaMemcpyDeviceToHost));
-	cudaMemcpy(pMatR, MatR, memSize, cudaMemcpyDeviceToHost);
-	// Libérer la mémoire du 
-	//GPU CUDA_SAFE_CALL( cudaFree(MatA)); 
-	cudaFree(MatA);
+
+	int BLOCK_SIZE = 16;
+	uchar *gMatI, *gMatO;
+
+	//	Grid of BLOCK_SIZE * BLOCK_SIZE blocks
+	dim3 dimGrid(BLOCK_SIZE, BLOCK_SIZE);
+	//	Block of BLOCK_SIZE * BLOCK_SIZE threads
+	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+
+	size_t memSize = DimMat.x * DimMat.y * sizeof(uchar);
+
+	//	2. Allocate memory for the data on the GPU
+	cudaStatus = cudaMalloc(&gMatI, memSize);
+	cudaStatus = cudaMalloc(&gMatO, memSize);
+
+	//	3. Copy the data on the GPU
+	cudaStatus = cudaMemcpy(gMatI, pMatI, memSize, cudaMemcpyHostToDevice);
+
+	//	4. Launch kernel
+	Kernel_ScalaireMulMat_Int <<<dimGrid, dimBlock >>>(gMatI, K, gMatO);
+	cudaStatus = cudaDeviceSynchronize();	
+	if (cudaStatus != cudaSuccess) {
+		fprintf(stderr, "Kernel failed!");
+		return cudaStatus;
+	}
+
+	//	5. Copy the data back on the CPU
+	cudaMemcpy(pMatO, gMatO, memSize, cudaMemcpyDeviceToHost);
+
+	//	6. Free the memory of the GPU
+	cudaFree(gMatI);
+	cudaFree(gMatO);
+
 	return cudaStatus;
 }
