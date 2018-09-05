@@ -1,9 +1,5 @@
 ﻿  Compiling CUDA source file Kernel.cu...
   
   C:\Users\usager\source\repos\CudaLab1\MulMat>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -IC:\opencv\..\..\include -IC:\opencv\build\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -D_DEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc140.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Kernel.cu.obj "C:\Users\usager\source\repos\CudaLab1\MulMat\Kernel.cu" 
-C:/Users/usager/source/repos/CudaLab1/MulMat/Kernel.cu(54): warning : variable "timer" was declared but never referenced
-C:/Users/usager/source/repos/CudaLab1/MulMat/Kernel.cu(54): warning : variable "TempsExecution" was declared but never referenced
   Kernel.cu
-C:/Users/usager/source/repos/CudaLab1/MulMat/Kernel.cu(54): warning C4101: 'TempsExecution' : variable locale non référencée
-  MulMat.cpp
   MulMat.vcxproj -> C:\Users\usager\source\repos\CudaLab1\x64\Debug\MulMat.exe
