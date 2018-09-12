@@ -11,7 +11,7 @@ typedef unsigned char uchar;
 
 /************************************************************************
 // KERNEL qui permet de faire une multiplication scalaire d'une matrice
-// d'entier. Chaque thread s'occupe d'un résultat
+// d'entier. Chaque thread s'occupe d'un rÃ©sultat
 /***********************************************************************/
 __global__
 static void Kernel_ScalaireMulMat_Int(uchar *MatI, int K, uchar *MatO)
@@ -22,6 +22,12 @@ static void Kernel_ScalaireMulMat_Int(uchar *MatI, int K, uchar *MatO)
 	int Index = ImgNumLigne * ImageWidth + ImgNumColonne;
 
 	MatO[Index] = MatI[Index] + 50;
+}
+
+__global__
+static void Kernel_Grad(uchar *MatI, int *gX, int *gY, int *MatO)
+{
+
 }
 
 /************************************************************************
@@ -41,22 +47,38 @@ extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *p
 	int BLOCK_SIZE = 16;
 	uchar *gMatI, *gMatO;
 
+	int gX[3][3] = { { -1, 0, 1 },
+					{ -2, 0, 2 },
+					{ -1, 0, 1 } };
+
+	int gY[3][3] = { { -1, -2, -1 },
+					{ 0, 0, 0 },
+					{ 1, 2, 1 } };
+
+	int size = (DimMat.y - 2) * (DimMat.x - 2);
+	int *gGrad = new int[size];
 	//	Grid of BLOCK_SIZE * BLOCK_SIZE blocks
 	dim3 dimGrid(BLOCK_SIZE, BLOCK_SIZE);
 	//	Block of BLOCK_SIZE * BLOCK_SIZE threads
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
 
 	size_t memSize = DimMat.x * DimMat.y * sizeof(uchar);
-
+	size_t memSizeInt = (DimMat.x - 2) * (DimMat.y - 2) * sizeof(int);
+	size_t memSizeConv = 3 * 3 * sizeof(int);
 	//	2. Allocate memory for the data on the GPU
 	cudaStatus = cudaMalloc(&gMatI, memSize);
 	cudaStatus = cudaMalloc(&gMatO, memSize);
+	cudaStatus = cudaMalloc(&gGrad, memSizeInt);
 
+	//cudaStatus = cudaMalloc(&gX, memSizeConv);
+	//cudaStatus = cudaMalloc(&gY, memSizeConv);
 	//	3. Copy the data on the GPU
 	cudaStatus = cudaMemcpy(gMatI, pMatI, memSize, cudaMemcpyHostToDevice);
 
 	//	4. Launch kernel
-	Kernel_ScalaireMulMat_Int <<<dimGrid, dimBlock >>>(gMatI, K, gMatO);
+	//Kernel_ScalaireMulMat_Int <<<dimGrid, dimBlock >>>(gMatI, K, gMatO);
+//	Kernel_Grad << <dimGrid, dimBlock >> >(gMatI, gX, gY, gGrad);
+	
 	cudaStatus = cudaDeviceSynchronize();	
 	if (cudaStatus != cudaSuccess) {
 		fprintf(stderr, "Kernel failed!");
