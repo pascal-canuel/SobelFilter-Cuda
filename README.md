@@ -14,5 +14,5 @@
 
 <h1 align="center">Algorithm</h1>
 
-#### By Pascal Canuel
+## By Pascal Canuel
 
