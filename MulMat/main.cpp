@@ -78,12 +78,16 @@ int gradientNorm(int posY, int posX) {
 
 int main()
 {
-	String imgPath = "../picture/tesla.jpg";
+	String imgPath = "../picture/city.jpg";
 	imgInput = imread(imgPath, 0);
 	//Mat imgOutput = imread(imgPath, 0);
 
-	imshow("lenaInput", imgInput);
+	imshow("InputGray", imgInput);
 
+	Mat img = imread(imgPath);
+	//namedWindow("Original", WINDOW_NORMAL);
+	//resizeWindow("Original", 1800, 900);
+	imshow("Original", img);
 	//	Call kernel launcher
 	//int k = 50;
 	//Launcher_ScalaireMulMat_Int(imgInput.data, k, imgOutput.data, dim3(imgInput.rows, imgOutput.cols));
@@ -127,6 +131,9 @@ int main()
 	//imshow("SobelCPU", imgSobelCPU);
 	Mat gpuSobel = imread(imgPath, 0);
 	GPGPU_Sobel(&imgInput, &gpuSobel);
+
+	//namedWindow("SobelGPU", WINDOW_NORMAL);
+	//resizeWindow("SobelGPU", 1800, 900);
 	imshow("SobelGPU", gpuSobel);
 
 	int bgst = 0;
