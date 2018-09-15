@@ -1,96 +1,146 @@
-#include "cuda_runtime.h" 
+#include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
 #include <stdio.h>
+#include "cuda_runtime.h"
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/video/tracking.hpp>
+#include "stdafx.h"
+//#include "nppdefs.h"
+//#include <npp.h>
 
 typedef unsigned char uchar;
+typedef unsigned int uint;
 
-//	If you want to have the .cu intellisense:
-//	Adding '.cu' under c++ extension in visual studio settings would enable syntax highlighting for c++ 
-//	keywords only. EDIT: It in Tools -> Options -> Text Editor -> File Extension type in cu and select 
-//	Microsoft Visual C++ as the editor and click add
+#define BLOCK_SIZE 32
+#define CV_64FC1 double
+#define CV_32F float
+#define CV_8U uchar
 
-/************************************************************************
-// KERNEL qui permet de faire une multiplication scalaire d'une matrice
-// d'entier. Chaque thread s'occupe d'un résultat
-/***********************************************************************/
-__global__
-static void Kernel_ScalaireMulMat_Int(uchar *MatI, int K, uchar *MatO)
+int iDivUp(int a, int b)
+{
+	return ((a % b) != 0) ? (a / b + 1) : (a / b);
+}
+
+__device__
+int absGrad(int grad) {
+	if (grad < 0) {
+		return -1 * grad;
+	}
+	else {
+		return grad;
+	}
+}
+
+__global__ void Kernel_Sobel(uchar* img, uchar* imgout, int ImgWidth, int imgHeigh) // , int* maskX, int* maskY
 {
 	int ImgNumColonne = blockIdx.x  * blockDim.x + threadIdx.x;
 	int ImgNumLigne = blockIdx.y  * blockDim.y + threadIdx.y;
-	int ImageWidth = blockDim.x * gridDim.x;
-	int Index = ImgNumLigne * ImageWidth + ImgNumColonne;
+	
+	int Index = (ImgNumLigne * ImgWidth) + (ImgNumColonne); // will be 3x greater
 
-	MatO[Index] = MatI[Index] + 50;
-}
+	//int nani = (ImgNumLigne * (ImgWidth / 3)) + ImgNumColonne;
 
-__global__
-static void Kernel_Grad(uchar *MatI, int *gX, int *gY, int *MatO)
-{
+	if ((ImgNumColonne < ImgWidth -2 ) && (ImgNumLigne < imgHeigh -2 )) //width / 3
+	{
+		//imgout[Index] = 50;
 
-}
+			//int y = ImgNumLigne; // change imgnumligne pour y
+			//int x = ImgNumColonne;
+			//int i = Index;
+			////imgout ->>> int 
+			int i = Index;
+			int gradX = img[i] * -3 + img[i + 1] * 0 + img[i + 2] * 3;
+			i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
+			gradX += img[i] * -10 + img[i + 1] * 0 + img[i + 2] * 10;
+			i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
+			gradX += img[i] * -3 + img[i + 1] * 0 + img[i + 2] * 3;
+			
+			i = Index;
+			int gradY = img[i] * -3 + img[i + 1] * -10 + img[i + 2] * -3;
+			i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
+			gradY += img[i] * 0 + img[i + 1] * 0 + img[i + 2] * 0;
+			i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
+			gradY += img[i] * 3 + img[i + 1] * 10 + img[i + 2] * 3;
 
-/************************************************************************
-// Fonction de lancement du kernel qui permet de faire une multiplication
-// scalaire d'une matrice d'entier.
-/***********************************************************************/
-extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *pMatO, dim3 DimMat)
-{
-	//	1. Initialize data
-	//	Choose which GPU to run on, change this on a multi-GPU system.    
-	cudaError_t cudaStatus = cudaSetDevice(0);
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "cudaSetDevice failed!  Do you have a CUDA-capable GPU installed?");
-		return cudaStatus;
+
+			int grad = absGrad(gradX) + absGrad(gradY);
+			int norm = grad * 0.0625;
+
+			imgout[Index] = norm;
+			////	Gradient X ne pas calculer * 0
+			//int gradX = img[i] * -1 + img[i + 1] * 0 + img[i + 2] * 1;
+			//i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
+			//gradX += img[i] * -2 + img[i + 1] * 0 + img[i + 2] * 2;
+			//i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
+			//gradX += img[i] * -1 + img[i + 1] * 0 + img[i + 2] * 1;
+
+			//i = (ImgNumLigne * ImgWidth) + (ImgNumColonne * 3);
+
+			////	Gradient Y
+			//int gradY = img[i] * -1 + img[i + 1] * -2 + img[i + 2] * -1;
+			//i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
+			//gradY += img[i] * 0 + img[i + 1] * 0 + img[i + 2] * 0;
+			//i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
+			//gradY += img[i] * 1 + img[i + 1] * 2 + img[i + 2] * 1;
+
+			////	Gradient 
+			//int gradient = abs(gradX) + abs(gradY);
+			//int norm = gradient * 0.125;
+
+			//imgout[i] = norm;
 	}
 
-	int BLOCK_SIZE = 16;
-	uchar *gMatI, *gMatO;
+	return;
+}
 
-	int gX[3][3] = { { -1, 0, 1 },
-					{ -2, 0, 2 },
-					{ -1, 0, 1 } };
+extern "C" bool GPGPU_Sobel(cv::Mat* imgTresh, cv::Mat* Grayscale)
+{
 
-	int gY[3][3] = { { -1, -2, -1 },
-					{ 0, 0, 0 },
-					{ 1, 2, 1 } };
+	//	1. Initialize data
+	cudaError_t cudaStatus;
+	uchar* gDevImage;
+	uchar* gDevImageOut;
 
-	int size = (DimMat.y - 2) * (DimMat.x - 2);
-	int *gGrad = new int[size];
-	//	Grid of BLOCK_SIZE * BLOCK_SIZE blocks
-	dim3 dimGrid(BLOCK_SIZE, BLOCK_SIZE);
-	//	Block of BLOCK_SIZE * BLOCK_SIZE threads
+	uint imageSize = imgTresh->rows * imgTresh->step1(); // will be x 3 greater 
+	uint gradientSize = imgTresh->rows * imgTresh->cols * sizeof(uchar);
+
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+	dim3 dimGrid(iDivUp(imgTresh->cols, BLOCK_SIZE), iDivUp(imgTresh->rows, BLOCK_SIZE));
 
-	size_t memSize = DimMat.x * DimMat.y * sizeof(uchar);
-	size_t memSizeInt = (DimMat.x - 2) * (DimMat.y - 2) * sizeof(int);
-	size_t memSizeConv = 3 * 3 * sizeof(int);
-	//	2. Allocate memory for the data on the GPU
-	cudaStatus = cudaMalloc(&gMatI, memSize);
-	cudaStatus = cudaMalloc(&gMatO, memSize);
-	cudaStatus = cudaMalloc(&gGrad, memSizeInt);
+	//	2. Allocation data
+	cudaStatus = cudaMalloc(&gDevImage, imageSize);
+	cudaStatus = cudaMalloc(&gDevImageOut, gradientSize);
 
-	//cudaStatus = cudaMalloc(&gX, memSizeConv);
-	//cudaStatus = cudaMalloc(&gY, memSizeConv);
-	//	3. Copy the data on the GPU
-	cudaStatus = cudaMemcpy(gMatI, pMatI, memSize, cudaMemcpyHostToDevice);
+	//	3. Copy data on GPU
+	cudaStatus = cudaMemcpy(gDevImage, imgTresh->data, imageSize, cudaMemcpyHostToDevice);
 
 	//	4. Launch kernel
-	//Kernel_ScalaireMulMat_Int <<<dimGrid, dimBlock >>>(gMatI, K, gMatO);
-//	Kernel_Grad << <dimGrid, dimBlock >> >(gMatI, gX, gY, gGrad);
-	
-	cudaStatus = cudaDeviceSynchronize();	
-	if (cudaStatus != cudaSuccess) {
-		fprintf(stderr, "Kernel failed!");
-		return cudaStatus;
+	Kernel_Sobel<<<dimGrid, dimBlock>>>(gDevImage, gDevImageOut, imgTresh->step1(), imgTresh->rows);
+
+	cudaStatus = cudaGetLastError();
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+		goto Error;
+	}
+	//Wait for the kernel to end
+	cudaStatus = cudaDeviceSynchronize();
+	if (cudaStatus != cudaSuccess)
+	{
+		fprintf(stderr, "cudaDeviceSynchronize failed!");
+		goto Error;
 	}
 
-	//	5. Copy the data back on the CPU
-	cudaMemcpy(pMatO, gMatO, memSize, cudaMemcpyDeviceToHost);
+	//	5. Copy data on CPU
+	cudaStatus = cudaMemcpy(Grayscale->data, gDevImageOut, gradientSize, cudaMemcpyDeviceToHost);
 
-	//	6. Free the memory of the GPU
-	cudaFree(gMatI);
-	cudaFree(gMatO);
+	//	6. Free GPU memory
+Error:
+	cudaFree(gDevImage);
+	cudaFree(gDevImageOut);
 
 	return cudaStatus;
 }

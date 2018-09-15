@@ -2,7 +2,7 @@
 // Lab 1 Vision par ordinateur
 // Par Pascal Canuel et Justin Roberge-Lavoie
 
-#include "pch.h"
+//#include "pch.h"
 //#include <opencv2/opencv.hpp>
 //#include <opencv2/core/core.hpp>
 //#include <opencv2/highgui/highgui.hpp>
@@ -11,6 +11,7 @@
 
 // MulMat.cpp : définit le point d'entrée pour l'application console.
 //
+#include "stdafx.h"
 
 #include <string>
 #include <iostream>
@@ -22,8 +23,8 @@
 
 using namespace cv;
 
-//extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *pMatO, dim3 DimMat);
-//extern  float TempsExecution; //	TODO start timer
+extern "C" bool GPGPU_Sobel(cv::Mat* imgTresh, cv::Mat* Grayscale);
+extern  float TempsExecution; //	TODO start timer
 
 Mat imgSobelCPU;
 Mat imgSobelCPUNorm;
@@ -44,6 +45,7 @@ int GxF[3][3] = { {-3, 0, 3},
 int GyF[3][3] = { {-3, -10, -3},
 				{0, 0, 0},
 				{3, 10, 3} };
+
 int gradient(int posY, int posX) {
 	int totalX = 0;
 	int totalY = 0;
@@ -78,51 +80,55 @@ int main()
 {
 	String imgPath = "../picture/tesla.jpg";
 	imgInput = imread(imgPath, 0);
-	Mat imgOutput = imread(imgPath, 0);
+	//Mat imgOutput = imread(imgPath, 0);
 
 	imshow("lenaInput", imgInput);
 
 	//	Call kernel launcher
-	int k = 50;
+	//int k = 50;
 	//Launcher_ScalaireMulMat_Int(imgInput.data, k, imgOutput.data, dim3(imgInput.rows, imgOutput.cols));
 
 	//	imgOutput.data should point to the modified data
 	//imshow("lenaOutput", imgOutput);
 
 	//	Sobel filter on CPU
-	imgSobelCPU = imread(imgPath, 0);
+	//imgSobelCPU = imread(imgPath, 0);
 
-	int size = (imgSobelCPU.rows - 2) * (imgSobelCPU.cols - 2);
-	int *gradTotal = new int[size];
-	for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
-		for (int x = 0; x < imgSobelCPU.cols - 2; x++) {
-			int width = imgSobelCPU.cols - 2;
-			int i = width * y + x;
+	//int size = (imgSobelCPU.rows - 2) * (imgSobelCPU.cols - 2);
+	//int *gradTotal = new int[size];
+	//for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
+	//	for (int x = 0; x < imgSobelCPU.cols - 2; x++) {
+	//		int width = imgSobelCPU.cols - 2;
+	//		int i = width * y + x;
 
-			int g = gradient(y, x);
-			gradTotal[i] = g;
-		}
-	}
+	//		int g = gradient(y, x);
+	//		gradTotal[i] = g;
+	//	}
+	//}
 
-	int minVal, maxVal;
-	minVal = *std::min_element(gradTotal, gradTotal + size);
-	maxVal = *std::max_element(gradTotal, gradTotal + size);
+	//int minVal, maxVal;
+	//minVal = *std::min_element(gradTotal, gradTotal + size);
+	//maxVal = *std::max_element(gradTotal, gradTotal + size);
 
-	// mapper int entre 0 et 255
-	for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
-		for (int x = 0; x < imgSobelCPU.cols - 2; x++) {
+	//// mapper int entre 0 et 255
+	//for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
+	//	for (int x = 0; x < imgSobelCPU.cols - 2; x++) {
 
-			int width = imgSobelCPU.cols - 2;
-			int i = width * y + x;
-			int current = gradTotal[i];
+	//		int width = imgSobelCPU.cols - 2;
+	//		int i = width * y + x;
+	//		int current = gradTotal[i];
 
-			int map = (current * 255) / maxVal;
+	//		int map = (current * 255) / maxVal;
 
-			imgSobelCPU.at<uchar>(y, x) = map;
-		}
-	}
+	//		imgSobelCPU.at<uchar>(y, x) = map;
+	//	}
+	//}
 
-	imshow("SobelCPU", imgSobelCPU);
+	//imshow("SobelCPU", imgSobelCPU);
+	Mat gpuSobel = imread(imgPath, 0);
+	GPGPU_Sobel(&imgInput, &gpuSobel);
+	imshow("SobelGPU", gpuSobel);
+
 	int bgst = 0;
 	imgSobelCPUNorm = imread(imgPath, 0);
 	for (int y = 0; y < imgSobelCPUNorm.rows - 2; y++) {
@@ -154,7 +160,7 @@ int main()
 						
 		}
 	}
-	imshow("norm", imgSobelCPUNorm);
+	imshow("SobelCPU", imgSobelCPUNorm);
 
 	//	Expected Sobel
 	Mat src_gray = imread(imgPath, 0);
@@ -172,7 +178,7 @@ int main()
 	convertScaleAbs(grad_x, abs_grad_x);
 	convertScaleAbs(grad_y, abs_grad_y);
 	addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad);
-	imshow("ExpectedSobel", grad);
+	imshow("OpenCVSobel", grad);
 
 	waitKey(0);
 	return 0;

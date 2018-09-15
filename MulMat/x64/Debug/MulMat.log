@@ -1,5 +1,19 @@
 ﻿  Compiling CUDA source file Kernel.cu...
   
-  C:\Users\usager\source\repos\CudaLab1\MulMat>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -IC:\opencv\..\..\include -IC:\opencv\build\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -D_DEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc140.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Kernel.cu.obj "C:\Users\usager\source\repos\CudaLab1\MulMat\Kernel.cu" 
+  C:\Users\usager\Documents\SobelFilter-master\SobelFilter-master\MulMat>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -IC:\opencv\..\..\include -IC:\opencv\build\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -D_DEBUG -D_CONSOLE -D_UNICODE -DUNICODE -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc140.pdb /FS /Zi /RTC1 /MDd " -o x64\Debug\Kernel.cu.obj "C:\Users\usager\Documents\SobelFilter-master\SobelFilter-master\MulMat\Kernel.cu" 
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(18): warning C4005: 'CV_64FC1'á: redÚfinition de macro
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(19): warning C4005: 'CV_32F'á: redÚfinition de macro
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(20): warning C4005: 'CV_8U'á: redÚfinition de macro
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\tchar.h(643): warning : expression has no effect
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(18): warning C4005: 'CV_64FC1'á: redÚfinition de macro
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(19): warning C4005: 'CV_32F'á: redÚfinition de macro
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(20): warning C4005: 'CV_8U'á: redÚfinition de macro
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\tchar.h(643): warning : expression has no effect
   Kernel.cu
-  MulMat.vcxproj -> C:\Users\usager\source\repos\CudaLab1\x64\Debug\MulMat.exe
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(107): warning C4267: 'initialisation' : conversion de 'size_t' en 'uint', perte possible de données
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(121): warning C4267: 'argument' : conversion de 'size_t' en 'int', perte possible de données
+C:/Users/usager/Documents/SobelFilter-master/SobelFilter-master/MulMat/Kernel.cu(145): warning C4800: 'cudaError_t' : valeur forcée à la valeur booléenne 'true' ou 'false' (avertissement sur les performances)
+  main.cpp
+c:\users\usager\documents\sobelfilter-master\sobelfilter-master\mulmat\main.cpp(137): warning C4267: 'initialisation' : conversion de 'size_t' en 'int', perte possible de données
+c:\users\usager\documents\sobelfilter-master\sobelfilter-master\mulmat\main.cpp(154): warning C4244: 'initialisation' : conversion de 'double' en 'int', perte possible de données
+  MulMat.vcxproj -> C:\Users\usager\Documents\SobelFilter-master\SobelFilter-master\x64\Debug\MulMat.exe
