@@ -1,12 +1,19 @@
+// VisionLab1.cpp : Ce fichier contient la fonction 'main'. L'exécution du programme commence et se termine à cet endroit.
+// Lab 1 Vision par ordinateur
+// Par Pascal Canuel et Justin Roberge-Lavoie
+
+#include "pch.h"
+//#include <opencv2/opencv.hpp>
+//#include <opencv2/core/core.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <iostream>
+//#include "range.h"
+
 // MulMat.cpp : définit le point d'entrée pour l'application console.
 //
 
-#include "stdafx.h"
 #include <string>
 #include <iostream>
-#include "cuda.h"
-#include "cuda_runtime.h" 
-#include "device_launch_parameters.h"
 #include <opencv2/core/core.hpp> 
 #include <opencv2/highgui/highgui.hpp> 
 #include <opencv2/imgproc/types_c.h> 
@@ -15,19 +22,28 @@
 
 using namespace cv;
 
-extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *pMatO, dim3 DimMat);
-extern  float TempsExecution; //	TODO start timer
+//extern "C" cudaError_t Launcher_ScalaireMulMat_Int(uchar *pMatI, int K, uchar *pMatO, dim3 DimMat);
+//extern  float TempsExecution; //	TODO start timer
 
 Mat imgSobelCPU;
+Mat imgSobelCPUNorm;
+Mat imgInput;
 
-int Gx[3][3] = {{-1, 0, 1},
+int Gx[3][3] = { {-1, 0, 1},
 				{-2, 0, 2},
-				{-1, 0, 1}};
+				{-1, 0, 1} };
 
-int Gy[3][3] = {{-1, -2, -1},
+int Gy[3][3] = { {-1, -2, -1},
 				{0, 0, 0},
-				{1, 2, 1}};
+				{1, 2, 1} };
 
+int GxF[3][3] = { {-3, 0, 3},
+				{-10, 0, 10},
+				{-3, 0, 3} };
+
+int GyF[3][3] = { {-3, -10, -3},
+				{0, 0, 0},
+				{3, 10, 3} };
 int gradient(int posY, int posX) {
 	int totalX = 0;
 	int totalY = 0;
@@ -43,10 +59,25 @@ int gradient(int posY, int posX) {
 	return abs(totalX) + abs(totalY);
 }
 
+int gradientNorm(int posY, int posX) {
+	int totalX = 0;
+	int totalY = 0;
+	for (int y = 0; y < 3; y++) {
+		for (int x = 0; x < 3; x++) {
+			int current = (int)imgInput.at<uchar>(posY + y, posX + x);
+			int conX = current * GxF[y][x];
+			int conY = current * GyF[y][x];
+			totalX += conX;
+			totalY += conY;
+		}
+	}
+	return abs(totalX) + abs(totalY);
+}
+
 int main()
 {
-	String imgPath = "../picture/lenaB.jpg";
-	Mat imgInput = imread(imgPath, 0);
+	String imgPath = "../picture/tesla.jpg";
+	imgInput = imread(imgPath, 0);
 	Mat imgOutput = imread(imgPath, 0);
 
 	imshow("lenaInput", imgInput);
@@ -60,7 +91,7 @@ int main()
 
 	//	Sobel filter on CPU
 	imgSobelCPU = imread(imgPath, 0);
-	
+
 	int size = (imgSobelCPU.rows - 2) * (imgSobelCPU.cols - 2);
 	int *gradTotal = new int[size];
 	for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
@@ -76,7 +107,7 @@ int main()
 	int minVal, maxVal;
 	minVal = *std::min_element(gradTotal, gradTotal + size);
 	maxVal = *std::max_element(gradTotal, gradTotal + size);
-	
+
 	// mapper int entre 0 et 255
 	for (int y = 0; y < imgSobelCPU.rows - 2; y++) {
 		for (int x = 0; x < imgSobelCPU.cols - 2; x++) {
@@ -92,6 +123,38 @@ int main()
 	}
 
 	imshow("SobelCPU", imgSobelCPU);
+	int bgst = 0;
+	imgSobelCPUNorm = imread(imgPath, 0);
+	for (int y = 0; y < imgSobelCPUNorm.rows - 2; y++) {
+		for (int x = 0; x < imgSobelCPUNorm.cols - 2; x++) {
+
+			int i = imgSobelCPUNorm.step1()  * y + x;
+
+			/*if (y == 0 || x == 0) {
+				imgSobelCPUNorm.data[i] = 255;
+			}*/
+
+			/*if ( y == imgSobelCPUNorm.rows - 1 || x == imgSobelCPUNorm.cols - 1) {
+				imgSobelCPUNorm.data[i] = 255;
+			}
+			else if (y == imgSobelCPUNorm.rows - 2 || x == imgSobelCPUNorm.cols - 2) {
+
+			}
+			else {*/
+				int width = imgSobelCPUNorm.cols - 2;
+
+				int g = gradientNorm(y, x);
+
+				int norm = g * 0.0625;
+				if (g > bgst)
+					bgst = g;
+				//imgSobelCPUNorm.at<uchar>(y + 1, x + 1) = norm;
+				imgSobelCPUNorm.data[i] = norm;
+			//}
+						
+		}
+	}
+	imshow("norm", imgSobelCPUNorm);
 
 	//	Expected Sobel
 	Mat src_gray = imread(imgPath, 0);
