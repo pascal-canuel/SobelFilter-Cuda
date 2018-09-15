@@ -12,7 +12,5 @@
 <img src="showcase/field.PNG"/>
 <img src="showcase/architectureMuseum.PNG"/>
 
-<h1 align="center">Algorithm</h1>
-
 ## By Pascal Canuel
 
