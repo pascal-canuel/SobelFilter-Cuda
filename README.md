@@ -6,11 +6,11 @@
 <p align="center">📐 Parallelization and implementation of the Sobel filter for edge detection in CUDA. 📏</p>
 
 <h1 align="center">Showcase</h1>
-<img src="showcase/city.PNG" alt="drawing"/>
-<img src="showcase/tesla.PNG" alt="drawing"/>
-<img src="showcase/architectureLion.PNG" alt="drawing"/>
-<img src="showcase/field.PNG" alt="drawing"/>
-<img src="showcase/museum.PNG" alt="drawing"/>
+<img src="showcase/city.PNG"/>
+<img src="showcase/tesla.PNG"/>
+<img src="showcase/architectureLion.PNG"/>
+<img src="showcase/field.PNG"/>
+<img src="showcase/architectureMuseum.PNG"/>
 
 <h1 align="center">Algorithm</h1>
 
