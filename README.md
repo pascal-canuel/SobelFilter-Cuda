@@ -12,5 +12,8 @@
 <img src="showcase/field.PNG"/>
 <img src="showcase/architectureMuseum.PNG"/>
 
+<h1 align="center">Execution time</h1>
+<img src="picture/graph.jpg"/>
+
 ## By Pascal Canuel
 
