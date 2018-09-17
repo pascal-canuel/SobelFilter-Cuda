@@ -174,7 +174,7 @@ int main()
 	// Record end time
 	auto finish = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = finish - start;
-	std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+	std::cout << "Elapsed time CPU: " << elapsed.count() << " s\n";
 	
 	//	Expected Sobel
 	Mat src_gray = imread(imgPath, 0);
