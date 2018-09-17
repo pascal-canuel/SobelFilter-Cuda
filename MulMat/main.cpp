@@ -20,6 +20,7 @@
 #include <opencv2/imgproc/types_c.h> 
 #include <opencv2/imgproc/imgproc.hpp> 
 #include <cmath>
+#include <chrono>  // for high_resolution_clock
 
 using namespace cv;
 
@@ -136,7 +137,9 @@ int main()
 	//resizeWindow("SobelGPU", 1800, 900);
 	imshow("SobelGPU", gpuSobel);
 
-	int bgst = 0;
+	// Record start time
+	auto start = std::chrono::high_resolution_clock::now();
+	
 	imgSobelCPUNorm = imread(imgPath, 0);
 	for (int y = 0; y < imgSobelCPUNorm.rows - 2; y++) {
 		for (int x = 0; x < imgSobelCPUNorm.cols - 2; x++) {
@@ -159,16 +162,20 @@ int main()
 				int g = gradientNorm(y, x);
 
 				int norm = g * 0.0625;
-				if (g > bgst)
-					bgst = g;
+
 				//imgSobelCPUNorm.at<uchar>(y + 1, x + 1) = norm;
 				imgSobelCPUNorm.data[i] = norm;
 			//}
 						
 		}
 	}
-	imshow("SobelCPU", imgSobelCPUNorm);
-
+	imshow("norm", imgSobelCPUNorm);
+	
+	// Record end time
+	auto finish = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = finish - start;
+	std::cout << "Elapsed time: " << elapsed.count() << " s\n";
+	
 	//	Expected Sobel
 	Mat src_gray = imread(imgPath, 0);
 	Mat grad;
