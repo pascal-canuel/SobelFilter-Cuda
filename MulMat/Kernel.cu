@@ -10,6 +10,7 @@
 #include "stdafx.h"
 //#include "nppdefs.h"
 //#include <npp.h>
+#include <chrono>  // for high_resolution_clock
 
 typedef unsigned char uchar;
 typedef unsigned int uint;
@@ -117,6 +118,9 @@ extern "C" bool GPGPU_Sobel(cv::Mat* imgTresh, cv::Mat* Grayscale)
 	//	3. Copy data on GPU
 	cudaStatus = cudaMemcpy(gDevImage, imgTresh->data, imageSize, cudaMemcpyHostToDevice);
 
+	// Record start time
+	auto start = std::chrono::high_resolution_clock::now();
+	
 	//	4. Launch kernel
 	Kernel_Sobel<<<dimGrid, dimBlock>>>(gDevImage, gDevImageOut, imgTresh->step1(), imgTresh->rows);
 
@@ -134,6 +138,11 @@ extern "C" bool GPGPU_Sobel(cv::Mat* imgTresh, cv::Mat* Grayscale)
 		goto Error;
 	}
 
+	// Record end time
+	auto finish = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed = finish - start;
+	std::cout << "Elapsed time GPGPU: " << elapsed.count() << " s\n";
+	
 	//	5. Copy data on CPU
 	cudaStatus = cudaMemcpy(Grayscale->data, gDevImageOut, gradientSize, cudaMemcpyDeviceToHost);
 
