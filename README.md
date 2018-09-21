@@ -12,6 +12,11 @@
 <img src="showcase/field.PNG"/>
 <img src="showcase/architectureMuseum.PNG"/>
 
+<img src="showcase/street.jpg"/>
+<img src="showcase/sky.jpg"/>
+<img src="showcase/fuji.jpg"/>
+<img src="showcase/avatar.jpg"/>
+
 <h1 align="center">Execution time</h1>
 <img src="picture/graph.jpg"/>
 
