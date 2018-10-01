@@ -3,7 +3,7 @@
 <img src="https://img.shields.io/badge/License-MIT-blue.svg">
 </p>
 
-<p align="center">📐 Parallelization and implementation of the Sobel filter for edge detection in CUDA. The kernel used is the Sobel–Feldman operator 📏</p>
+<p align="center">📐 Parallelization and implementation of the Sobel filter for edge detection in CUDA. 📏</p>
 
 <h1 align="center">Showcase</h1>
 <img src="showcase/city.PNG"/>

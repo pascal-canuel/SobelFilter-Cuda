@@ -35,23 +35,15 @@ int absGrad(int grad) {
 	}
 }
 
-__global__ void Kernel_Sobel(uchar* img, uchar* imgout, int ImgWidth, int imgHeigh) // , int* maskX, int* maskY
+__global__ void Kernel_Sobel(uchar* img, uchar* imgout, int ImgWidth, int imgHeigh)
 {
 	int ImgNumColonne = blockIdx.x  * blockDim.x + threadIdx.x;
 	int ImgNumLigne = blockIdx.y  * blockDim.y + threadIdx.y;
 	
-	int Index = (ImgNumLigne * ImgWidth) + (ImgNumColonne); // will be 3x greater
+	int Index = (ImgNumLigne * ImgWidth) + (ImgNumColonne);
 
-	//int nani = (ImgNumLigne * (ImgWidth / 3)) + ImgNumColonne;
-
-	if ((ImgNumColonne < ImgWidth -2 ) && (ImgNumLigne < imgHeigh -2 )) //width / 3
+	if ((ImgNumColonne < ImgWidth -2 ) && (ImgNumLigne < imgHeigh -2 ))
 	{
-		//imgout[Index] = 50;
-
-			//int y = ImgNumLigne; // change imgnumligne pour y
-			//int x = ImgNumColonne;
-			//int i = Index;
-			////imgout ->>> int 
 			int i = Index;
 			int gradX = img[i] * -3 + img[i + 1] * 0 + img[i + 2] * 3;
 			i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
@@ -71,27 +63,6 @@ __global__ void Kernel_Sobel(uchar* img, uchar* imgout, int ImgWidth, int imgHei
 			int norm = grad * 0.0625;
 
 			imgout[Index] = norm;
-			////	Gradient X ne pas calculer * 0
-			//int gradX = img[i] * -1 + img[i + 1] * 0 + img[i + 2] * 1;
-			//i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
-			//gradX += img[i] * -2 + img[i + 1] * 0 + img[i + 2] * 2;
-			//i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
-			//gradX += img[i] * -1 + img[i + 1] * 0 + img[i + 2] * 1;
-
-			//i = (ImgNumLigne * ImgWidth) + (ImgNumColonne * 3);
-
-			////	Gradient Y
-			//int gradY = img[i] * -1 + img[i + 1] * -2 + img[i + 2] * -1;
-			//i = ((ImgNumLigne + 1) * ImgWidth) + (ImgNumColonne);
-			//gradY += img[i] * 0 + img[i + 1] * 0 + img[i + 2] * 0;
-			//i = ((ImgNumLigne + 2) * ImgWidth) + (ImgNumColonne);
-			//gradY += img[i] * 1 + img[i + 1] * 2 + img[i + 2] * 1;
-
-			////	Gradient 
-			//int gradient = abs(gradX) + abs(gradY);
-			//int norm = gradient * 0.125;
-
-			//imgout[i] = norm;
 	}
 
 	return;
@@ -105,7 +76,7 @@ extern "C" bool GPGPU_Sobel(cv::Mat* imgTresh, cv::Mat* Grayscale)
 	uchar* gDevImage;
 	uchar* gDevImageOut;
 
-	uint imageSize = imgTresh->rows * imgTresh->step1(); // will be x 3 greater 
+	uint imageSize = imgTresh->rows * imgTresh->step1(); 
 	uint gradientSize = imgTresh->rows * imgTresh->cols * sizeof(uchar);
 
 	dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
